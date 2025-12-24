@@ -1,0 +1,8 @@
+[package]
+version = "0.1.0"
+name = "fibonacci-program"
+edition = "2021"
+
+[dependencies]
+sp1-zkvm = "5.0.8"
+ckb-vm = { git = "https://github.com/XuJiandong/ckb-vm.git", rev = "55c80c0" }
