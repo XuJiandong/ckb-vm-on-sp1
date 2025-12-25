@@ -37,7 +37,8 @@ fn main_interpreter64(code: Bytes, args: Vec<Bytes>) {
     machine
         .load_program(&code, args.into_iter().map(Ok))
         .expect("load program");
-    machine.run().expect("run program");
+    let exit_code = machine.run().expect("run program");
+    sp1_zkvm::io::commit(&exit_code);
 }
 
 fn main() {

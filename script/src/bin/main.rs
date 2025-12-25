@@ -48,10 +48,14 @@ fn main() {
 
     if args.execute {
         // Execute the program
-        let (_output, report) = client.execute(FIBONACCI_ELF, &stdin).run().unwrap();
-        println!("Program executed successfully.");
-        // Record the number of cycles executed.
-        println!("Number of cycles: {}", report.total_instruction_count());
+        let (mut public_values, report) = client.execute(FIBONACCI_ELF, &stdin).run().unwrap();
+        let exit_code = public_values.read::<i8>();
+        println!("Program executed successfully. Exit code = {}", exit_code);
+        println!(
+            "Number of cycles: {}, Prover Gas: {} ",
+            report.total_instruction_count(),
+            report.gas.unwrap_or(0)
+        );
     } else {
         // Setup the program for proving.
         let (pk, vk) = client.setup(FIBONACCI_ELF);
@@ -59,6 +63,7 @@ fn main() {
         // Generate the proof
         let proof = client
             .prove(&pk, &stdin)
+            .plonk()
             .run()
             .expect("failed to generate proof");
 
