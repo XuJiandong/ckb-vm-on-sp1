@@ -11,8 +11,8 @@
 //! ```
 
 use alloy_sol_types::SolType;
+use ckb_vm_interpreter_lib::PublicValuesStruct;
 use clap::{Parser, ValueEnum};
-use fibonacci_lib::PublicValuesStruct;
 use serde::{Deserialize, Serialize};
 use sp1_sdk::{
     include_elf, Elf, HashableKey, ProveRequest, Prover, ProverClient,
@@ -21,7 +21,7 @@ use sp1_sdk::{
 use std::path::PathBuf;
 
 /// The ELF (executable and linkable format) file for the Succinct RISC-V zkVM.
-pub const FIBONACCI_ELF: Elf = include_elf!("fibonacci-program");
+pub const CKB_VM_INTERPRETER_ELF: Elf = include_elf!("ckb-vm-interpreter-program");
 
 /// The arguments for the EVM command.
 #[derive(Parser, Debug)]
@@ -43,7 +43,7 @@ enum ProofSystem {
 /// A fixture that can be used to test the verification of SP1 zkVM proofs inside Solidity.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct SP1FibonacciProofFixture {
+struct SP1ProofFixture {
     a: u32,
     b: u32,
     n: u32,
@@ -58,7 +58,10 @@ async fn main() {
 
     let args = EVMArgs::parse();
     let client = ProverClient::from_env().await;
-    let pk = client.setup(FIBONACCI_ELF).await.expect("setup failed");
+    let pk = client
+        .setup(CKB_VM_INTERPRETER_ELF)
+        .await
+        .expect("setup failed");
 
     let mut stdin = SP1Stdin::new();
     stdin.write(&args.n);
@@ -84,7 +87,7 @@ fn create_proof_fixture<PK: ProvingKeyTrait>(
     let bytes = proof.public_values.as_slice();
     let PublicValuesStruct { n, a, b } = PublicValuesStruct::abi_decode(bytes).unwrap();
 
-    let fixture = SP1FibonacciProofFixture {
+    let fixture = SP1ProofFixture {
         a,
         b,
         n,

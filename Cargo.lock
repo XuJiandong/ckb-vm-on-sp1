@@ -876,6 +876,38 @@ dependencies = [
 ]
 
 [[package]]
+name = "ckb-vm-interpreter-lib"
+version = "0.1.0"
+dependencies = [
+ "alloy-sol-types",
+]
+
+[[package]]
+name = "ckb-vm-interpreter-program"
+version = "0.1.0"
+dependencies = [
+ "ckb-vm",
+ "sp1-zkvm",
+]
+
+[[package]]
+name = "ckb-vm-interpreter-script"
+version = "0.1.0"
+dependencies = [
+ "alloy-sol-types",
+ "ckb-vm-interpreter-lib",
+ "clap",
+ "dotenv",
+ "hex",
+ "serde",
+ "serde_json",
+ "sp1-build",
+ "sp1-sdk",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
 name = "clang-sys"
 version = "1.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1640,38 +1672,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
-]
-
-[[package]]
-name = "fibonacci-lib"
-version = "0.1.0"
-dependencies = [
- "alloy-sol-types",
-]
-
-[[package]]
-name = "fibonacci-program"
-version = "0.1.0"
-dependencies = [
- "ckb-vm",
- "sp1-zkvm",
-]
-
-[[package]]
-name = "fibonacci-script"
-version = "0.1.0"
-dependencies = [
- "alloy-sol-types",
- "clap",
- "dotenv",
- "fibonacci-lib",
- "hex",
- "serde",
- "serde_json",
- "sp1-build",
- "sp1-sdk",
- "tokio",
- "tracing",
 ]
 
 [[package]]

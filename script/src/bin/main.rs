@@ -14,7 +14,7 @@ use clap::Parser;
 use sp1_sdk::{include_elf, Elf, ProveRequest, Prover, ProverClient, ProvingKey, SP1Stdin};
 
 /// The ELF (executable and linkable format) file for the Succinct RISC-V zkVM.
-pub const FIBONACCI_ELF: Elf = include_elf!("fibonacci-program");
+pub const CKB_VM_INTERPRETER_ELF: Elf = include_elf!("ckb-vm-interpreter-program");
 
 /// The arguments for the command.
 #[derive(Parser, Debug)]
@@ -43,12 +43,16 @@ async fn main() {
     let stdin = SP1Stdin::new();
 
     if args.execute {
-        let (mut public_values, report) = client.execute(FIBONACCI_ELF, stdin).await.unwrap();
+        let (mut public_values, report) =
+            client.execute(CKB_VM_INTERPRETER_ELF, stdin).await.unwrap();
         let exit_code = public_values.read::<i8>();
         println!("Program executed successfully. Exit code = {}", exit_code);
         println!("Number of cycles: {}", report.total_instruction_count());
     } else {
-        let pk = client.setup(FIBONACCI_ELF).await.expect("setup failed");
+        let pk = client
+            .setup(CKB_VM_INTERPRETER_ELF)
+            .await
+            .expect("setup failed");
 
         let proof = client
             .prove(&pk, stdin)
