@@ -21,6 +21,11 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v3
+        with:
+          version: "29.4"
+
       - name: Install rust toolchain
         uses: actions-rs/toolchain@v1
         with:
