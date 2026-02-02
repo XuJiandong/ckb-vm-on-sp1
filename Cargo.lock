@@ -854,7 +854,7 @@ dependencies = [
 [[package]]
 name = "ckb-vm"
 version = "0.24.0"
-source = "git+https://github.com/XuJiandong/ckb-vm.git?rev=55c80c0#55c80c0b655d8ff709f61f8fcd42cac80bbb821e"
+source = "git+https://github.com/XuJiandong/ckb-vm.git?branch=fix-sp1#b11fcbf0597f152b3be6907deca8ac2d75989b40"
 dependencies = [
  "byteorder",
  "bytes",
@@ -870,9 +870,9 @@ dependencies = [
 [[package]]
 name = "ckb-vm-definitions"
 version = "0.24.0"
-source = "git+https://github.com/XuJiandong/ckb-vm.git?rev=55c80c0#55c80c0b655d8ff709f61f8fcd42cac80bbb821e"
+source = "git+https://github.com/XuJiandong/ckb-vm.git?branch=fix-sp1#b11fcbf0597f152b3be6907deca8ac2d75989b40"
 dependencies = [
- "paste",
+ "pastey",
 ]
 
 [[package]]
@@ -3262,6 +3262,12 @@ name = "paste"
 version = "1.0.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
+
+[[package]]
+name = "pastey"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b867cad97c0791bbd3aaa6472142568c6c9e8f71937e98379f584cfb0cf35bec"
 
 [[package]]
 name = "pem-rfc7468"
