@@ -11,10 +11,10 @@
 //! ```
 
 use clap::Parser;
-use sp1_sdk::{include_elf, ProverClient, SP1Stdin};
+use sp1_sdk::{include_elf, Elf, ProveRequest, Prover, ProverClient, ProvingKey, SP1Stdin};
 
 /// The ELF (executable and linkable format) file for the Succinct RISC-V zkVM.
-pub const FIBONACCI_ELF: &[u8] = include_elf!("fibonacci-program");
+pub const CKB_VM_INTERPRETER_ELF: Elf = include_elf!("ckb-vm-interpreter-program");
 
 /// The arguments for the command.
 #[derive(Parser, Debug)]
@@ -27,12 +27,11 @@ struct Args {
     prove: bool,
 }
 
-fn main() {
-    // Setup the logger.
+#[tokio::main]
+async fn main() {
     sp1_sdk::utils::setup_logger();
     dotenv::dotenv().ok();
 
-    // Parse the command line arguments.
     let args = Args::parse();
 
     if args.execute == args.prove {
@@ -40,36 +39,32 @@ fn main() {
         std::process::exit(1);
     }
 
-    // Setup the prover client.
-    let client = ProverClient::from_env();
-
-    // Setup the inputs.
+    let client = ProverClient::from_env().await;
     let stdin = SP1Stdin::new();
 
     if args.execute {
-        // Execute the program
-        let (mut public_values, report) = client.execute(FIBONACCI_ELF, &stdin).run().unwrap();
+        let (mut public_values, report) =
+            client.execute(CKB_VM_INTERPRETER_ELF, stdin).await.unwrap();
         let exit_code = public_values.read::<i8>();
         println!("Program executed successfully. Exit code = {}", exit_code);
-        println!(
-            "Number of cycles: {}, Prover Gas: {} ",
-            report.total_instruction_count(),
-            report.gas.unwrap_or(0)
-        );
+        println!("Number of cycles: {}", report.total_instruction_count());
     } else {
-        // Setup the program for proving.
-        let (pk, vk) = client.setup(FIBONACCI_ELF);
+        let pk = client
+            .setup(CKB_VM_INTERPRETER_ELF)
+            .await
+            .expect("setup failed");
 
-        // Generate the proof
         let proof = client
-            .prove(&pk, &stdin)
-            .run()
+            .prove(&pk, stdin)
+            .core()
+            .await
             .expect("failed to generate proof");
 
         println!("Successfully generated proof!");
 
-        // Verify the proof.
-        client.verify(&proof, &vk).expect("failed to verify proof");
+        client
+            .verify(&proof, pk.verifying_key(), None)
+            .expect("failed to verify proof");
         println!("Successfully verified proof!");
     }
 }

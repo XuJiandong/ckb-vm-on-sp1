@@ -1,5 +1,5 @@
-//! A simple program that takes a number `n` as input, and writes the `n-1`th and `n`th fibonacci
-//! number as an output.
+//! A program that runs a CKB-VM interpreter inside the SP1 zkVM to execute
+//! a secp256k1 ECDSA signature verification.
 
 // These two lines are necessary for the program to properly compile.
 //
