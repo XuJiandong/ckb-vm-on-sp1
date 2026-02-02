@@ -1,10 +1,11 @@
-use sp1_sdk::{include_elf, HashableKey, Prover, ProverClient};
+use sp1_sdk::{include_elf, Elf, HashableKey, Prover, ProverClient, ProvingKey};
 
 /// The ELF (executable and linkable format) file for the Succinct RISC-V zkVM.
-pub const FIBONACCI_ELF: &[u8] = include_elf!("fibonacci-program");
+pub const FIBONACCI_ELF: Elf = include_elf!("fibonacci-program");
 
-fn main() {
-    let prover = ProverClient::builder().cpu().build();
-    let (_, vk) = prover.setup(FIBONACCI_ELF);
-    println!("{}", vk.bytes32());
+#[tokio::main]
+async fn main() {
+    let prover = ProverClient::builder().cpu().build().await;
+    let pk = prover.setup(FIBONACCI_ELF).await.expect("setup failed");
+    println!("{}", pk.verifying_key().bytes32());
 }
