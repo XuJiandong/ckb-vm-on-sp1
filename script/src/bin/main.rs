@@ -1,17 +1,22 @@
-//! An end-to-end example of using the SP1 SDK to generate a proof of a program that can be executed
-//! or have a core proof generated.
+//! SP1 script for executing and proving the CKB-VM interpreter program.
 //!
-//! You can run this script using the following command:
+//! Usage:
 //! ```shell
+//! # Fast execution with gas estimation (recommended for development)
+//! cargo run --release -- --minimal-execute
+//!
+//! # Full execution via ProverClient
 //! RUST_LOG=info cargo run --release -- --execute
-//! ```
-//! or
-//! ```shell
+//!
+//! # Generate proof (requires significant resources)
 //! RUST_LOG=info cargo run --release -- --prove
 //! ```
 
 use clap::Parser;
+use sp1_core_executor::{GasEstimatingVM, MinimalExecutor, Program, SP1CoreOpts};
+use sp1_hypercube::air::PROOF_NONCE_NUM_WORDS;
 use sp1_sdk::{include_elf, Elf, ProveRequest, Prover, ProverClient, ProvingKey, SP1Stdin};
+use std::sync::Arc;
 
 /// The ELF (executable and linkable format) file for the Succinct RISC-V zkVM.
 pub const CKB_VM_INTERPRETER_ELF: Elf = include_elf!("ckb-vm-interpreter-program");
@@ -25,6 +30,9 @@ struct Args {
 
     #[arg(long)]
     prove: bool,
+
+    #[arg(long)]
+    minimal_execute: bool,
 }
 
 #[tokio::main]
@@ -34,9 +42,47 @@ async fn main() {
 
     let args = Args::parse();
 
-    if args.execute == args.prove {
-        eprintln!("Error: You must specify either --execute or --prove");
+    let options_count = args.execute as u8 + args.prove as u8 + args.minimal_execute as u8;
+    if options_count != 1 {
+        eprintln!(
+            "Error: You must specify exactly one of --execute, --prove, or --minimal-execute"
+        );
         std::process::exit(1);
+    }
+
+    if args.minimal_execute {
+        let elf_bytes: &[u8] = &CKB_VM_INTERPRETER_ELF;
+        let program = Arc::new(Program::from(elf_bytes).unwrap());
+        let mut executor = MinimalExecutor::new(program.clone(), false, Some(1000));
+
+        executor.with_input(&[]);
+
+        let proof_nonce: [u32; PROOF_NONCE_NUM_WORDS] = [0; PROOF_NONCE_NUM_WORDS];
+        let opts = SP1CoreOpts::default();
+
+        let mut total_gas: u64 = 0;
+
+        while !executor.is_done() {
+            let trace_chunk = executor.execute_chunk().unwrap();
+            let mut gas_vm =
+                GasEstimatingVM::new(&trace_chunk, program.clone(), proof_nonce, opts.clone());
+            let report = gas_vm.execute().unwrap();
+            if let Some(gas) = report.gas() {
+                total_gas += gas;
+            }
+        }
+
+        println!(
+            "Cycles executed: {:.1}M",
+            executor.global_clk() as f64 / 1_000_000.0
+        );
+        println!("Total gas cost: {:.1}M", total_gas as f64 / 1_000_000.0);
+
+        let exit_code = executor.exit_code();
+        if exit_code != 0 {
+            panic!("Execution failed with exit code: {}", exit_code);
+        }
+        return;
     }
 
     let client = ProverClient::from_env().await;

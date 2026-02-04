@@ -25,6 +25,7 @@ impl<Mac: SupportMachine> Syscalls<Mac> for DebugSyscall {
     }
 }
 
+#[cfg(not(feature = "asm"))]
 fn main_interpreter64(code: Bytes, args: Vec<Bytes>) {
     let core_machine = ckb_vm::DefaultCoreMachine::<u64, ckb_vm::SparseMemory<u64>>::new(
         ckb_vm::ISA_IMC | ckb_vm::ISA_B | ckb_vm::ISA_A | ckb_vm::ISA_MOP,
@@ -41,6 +42,29 @@ fn main_interpreter64(code: Bytes, args: Vec<Bytes>) {
     sp1_zkvm::io::commit(&exit_code);
 }
 
+#[cfg(feature = "asm")]
+fn main_asm64(code: Bytes, args: Vec<Bytes>) {
+    let asm_core = ckb_vm::machine::asm::AsmCoreMachine::new(
+        ckb_vm::ISA_IMC | ckb_vm::ISA_B | ckb_vm::ISA_A | ckb_vm::ISA_MOP,
+        ckb_vm::machine::VERSION2,
+        u64::MAX,
+    );
+    let core = ckb_vm::machine::asm::AsmDefaultMachineBuilder::new(asm_core)
+        .instruction_cycle_func(Box::new(estimate_cycles))
+        .syscall(Box::new(DebugSyscall {}))
+        .build();
+    let mut machine = ckb_vm::machine::asm::AsmMachine::new(core);
+    machine
+        .load_program(&code, args.into_iter().map(Ok))
+        .expect("load program");
+    let exit_code = machine.run().expect("run program");
+    sp1_zkvm::io::commit(&exit_code);
+}
+
 fn main() {
-    main_interpreter64(CODE.into(), vec![])
+    #[cfg(not(feature = "asm"))]
+    main_interpreter64(CODE.into(), vec![]);
+
+    #[cfg(feature = "asm")]
+    main_asm64(CODE.into(), vec![]);
 }

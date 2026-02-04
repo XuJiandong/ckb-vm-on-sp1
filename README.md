@@ -34,6 +34,12 @@ To run the program without generating a proof:
 cargo run --release -- --execute
 ```
 
+For faster development iteration, use `--minimal-execute` which only outputs cycle count:
+
+```sh
+cargo run --release -- --minimal-execute
+```
+
 ### Generate an SP1 Core Proof
 
 To generate an SP1 [core proof](https://docs.succinct.xyz/docs/sp1/generating-proofs/proof-types#core-default):
@@ -42,22 +48,6 @@ To generate an SP1 [core proof](https://docs.succinct.xyz/docs/sp1/generating-pr
 cargo run --release -- --prove
 ```
 
-### Generate an EVM-Compatible Proof
-
-> [!WARNING]
-> You will need at least 16GB RAM to generate a Groth16 or PLONK proof. View the [SP1 docs](https://docs.succinct.xyz/docs/sp1/getting-started/hardware-requirements#local-proving) for more information.
-
-To generate a Groth16 proof:
-
-```sh
-cargo run --release --bin evm -- --system groth16
-```
-
-To generate a PLONK proof:
-
-```sh
-cargo run --release --bin evm -- --system plonk
-```
 
 ### Retrieve the Verification Key
 

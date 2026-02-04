@@ -3,6 +3,10 @@ version = "0.1.0"
 name = "ckb-vm-interpreter-program"
 edition = "2021"
 
+[features]
+default = ["asm"]
+asm = ["ckb-vm/asm"]
+
 [dependencies]
 sp1-zkvm = { git = "https://github.com/succinctlabs/sp1", tag = "v6.0.0-beta.1" }
-ckb-vm = { git = "https://github.com/XuJiandong/ckb-vm.git", rev = "55c80c0" }
+ckb-vm = { git = "https://github.com/mohanson-fork/ckb-vm.git", branch = "asm_rv64im" }
