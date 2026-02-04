@@ -48,4 +48,4 @@ jobs:
         run: |
           export CC_riscv64im_succinct_zkvm_elf=riscv64-linux-gnu-gcc
           cd program && ~/.sp1/bin/cargo-prove prove build
-          cd .. && cargo run --release -- --execute
+          cd .. && cargo run --release -- --minimal-execute
