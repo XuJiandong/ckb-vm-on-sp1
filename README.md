@@ -1,17 +1,20 @@
-# CKB-VM Interpreter on SP1
+# CKB-VM on SP1
 
-This project runs a [CKB-VM](https://github.com/nervosnetwork/ckb-vm) interpreter inside the [SP1](https://github.com/succinctlabs/sp1) zkVM to generate zero-knowledge proofs of CKB-VM program execution.
+This project runs [CKB-VM](https://github.com/nervosnetwork/ckb-vm) inside the [SP1](https://github.com/succinctlabs/sp1) zkVM to generate zero-knowledge proofs of CKB-VM program execution. The goal is to estimate the performance of CKB-VM on SP1.
 
-The example program performs a secp256k1 ECDSA signature verification inside CKB-VM, which itself runs within SP1 zkVM.
+The example program performs secp256k1 ECDSA signature verification inside CKB-VM, which runs within SP1 zkVM.
 
 ## Dependencies
 
-- [Rust](https://rustup.rs/)
-- [SP1](https://docs.succinct.xyz/docs/sp1/getting-started/install) (v6.0.0-beta.1)
+- [Rust](https://rustup.rs/) (1.92.0)
+- [SP1](https://docs.succinct.xyz/docs/next/sp1/introduction) (v6.0.0-beta.1, hypercube)
+- [Protobuf Compiler](https://github.com/protocolbuffers/protobuf) (v29.4)
+- gcc-riscv64-linux-gnu (apt)
+- rustup target: `riscv64gc-unknown-linux-gnu`
 
 ## Project Structure
 
-- `program/` - The SP1 zkVM program that runs the CKB-VM interpreter
+- `program/` - The SP1 zkVM program that runs the CKB-VM
 - `script/` - Scripts to build, execute, and generate proofs
 - `lib/` - Shared library for public values
 
@@ -28,16 +31,15 @@ Or it will be automatically built through `script/build.rs` when the script is b
 
 ### Execute the Program
 
-To run the program without generating a proof:
+For faster development iteration, use `--minimal-execute` which only outputs cycle count and gas cost:
+```sh
+cargo run --release -- --minimal-execute
+```
+
+To run the program without generating a proof(slower than above):
 
 ```sh
 cargo run --release -- --execute
-```
-
-For faster development iteration, use `--minimal-execute` which only outputs cycle count:
-
-```sh
-cargo run --release -- --minimal-execute
 ```
 
 ### Generate an SP1 Core Proof
@@ -48,23 +50,5 @@ To generate an SP1 [core proof](https://docs.succinct.xyz/docs/sp1/generating-pr
 cargo run --release -- --prove
 ```
 
+> **Note:** Proof generation is resource-intensive and may take significant time and memory.
 
-### Retrieve the Verification Key
-
-```sh
-cargo run --release --bin vkey
-```
-
-## Using the Prover Network
-
-We recommend using the [Succinct Prover Network](https://docs.succinct.xyz/docs/network/introduction) for non-trivial programs. See the [key setup guide](https://docs.succinct.xyz/docs/network/developers/key-setup) to get started.
-
-```sh
-cp .env.example .env
-```
-
-Set `SP1_PROVER=network` and `NETWORK_PRIVATE_KEY` to your whitelisted private key.
-
-```sh
-SP1_PROVER=network NETWORK_PRIVATE_KEY=... cargo run --release --bin evm
-```
