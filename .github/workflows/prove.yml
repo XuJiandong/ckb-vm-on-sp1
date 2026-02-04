@@ -30,7 +30,13 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: 1.85.0
+          toolchain: 1.92.0
+
+      - name: Setup gcc
+        run: |
+          sudo apt-get update -y
+          sudo apt install -y gcc-riscv64-linux-gnu
+          rustup target add riscv64gc-unknown-linux-gnu
 
       - name: Install SP1 toolchain
         run: |
