@@ -44,11 +44,8 @@ jobs:
           ~/.sp1/bin/sp1up -v 6.0.0-beta.1
           ~/.sp1/bin/cargo-prove prove --version
 
-      - name: Build SP1 program
+      - name: Build SP1 program and run
         run: |
-          cd program
-          ~/.sp1/bin/cargo-prove prove build
-
-      - name: Execute SP1 program
-        run: |
-          cargo run --release -- --minimal-execute
+          export CC_riscv64im_succinct_zkvm_elf=riscv64-linux-gnu-gcc
+          cd program && ~/.sp1/bin/cargo-prove prove build
+          cd .. && cargo run --release -- --minimal-execute
