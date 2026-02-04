@@ -854,7 +854,7 @@ dependencies = [
 [[package]]
 name = "ckb-vm"
 version = "0.24.0"
-source = "git+https://github.com/XuJiandong/ckb-vm.git?branch=fix-sp1#b11fcbf0597f152b3be6907deca8ac2d75989b40"
+source = "git+https://github.com/mohanson-fork/ckb-vm.git?branch=asm_rv64im_label#d9d03f5eb25b22dc96b1b24af6c83e9a6c3ef001"
 dependencies = [
  "byteorder",
  "bytes",
@@ -870,7 +870,7 @@ dependencies = [
 [[package]]
 name = "ckb-vm-definitions"
 version = "0.24.0"
-source = "git+https://github.com/XuJiandong/ckb-vm.git?branch=fix-sp1#b11fcbf0597f152b3be6907deca8ac2d75989b40"
+source = "git+https://github.com/mohanson-fork/ckb-vm.git?branch=asm_rv64im_label#d9d03f5eb25b22dc96b1b24af6c83e9a6c3ef001"
 dependencies = [
  "pastey",
 ]
@@ -902,6 +902,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sp1-build",
+ "sp1-core-executor",
  "sp1-sdk",
  "tokio",
  "tracing",

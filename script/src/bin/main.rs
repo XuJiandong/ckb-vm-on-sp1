@@ -11,7 +11,9 @@
 //! ```
 
 use clap::Parser;
+use sp1_core_executor::{MinimalExecutor, Program};
 use sp1_sdk::{include_elf, Elf, ProveRequest, Prover, ProverClient, ProvingKey, SP1Stdin};
+use std::sync::Arc;
 
 /// The ELF (executable and linkable format) file for the Succinct RISC-V zkVM.
 pub const CKB_VM_INTERPRETER_ELF: Elf = include_elf!("ckb-vm-interpreter-program");
@@ -25,6 +27,9 @@ struct Args {
 
     #[arg(long)]
     prove: bool,
+
+    #[arg(long)]
+    minimal_execute: bool,
 }
 
 #[tokio::main]
@@ -34,9 +39,27 @@ async fn main() {
 
     let args = Args::parse();
 
-    if args.execute == args.prove {
-        eprintln!("Error: You must specify either --execute or --prove");
+    let options_count =
+        args.execute as u8 + args.prove as u8 + args.minimal_execute as u8;
+    if options_count != 1 {
+        eprintln!("Error: You must specify exactly one of --execute, --prove, or --minimal-execute");
         std::process::exit(1);
+    }
+
+    if args.minimal_execute {
+        let elf_bytes: &[u8] = &CKB_VM_INTERPRETER_ELF;
+        let program = Arc::new(Program::from(elf_bytes).unwrap());
+        let mut executor = MinimalExecutor::simple(program);
+
+        executor.with_input(&[]);
+
+        while !executor.is_done() {
+            executor.execute_chunk();
+        }
+
+        println!("Cycles executed: {}", executor.global_clk());
+        println!("Exit code: {}", executor.exit_code());
+        return;
     }
 
     let client = ProverClient::from_env().await;
