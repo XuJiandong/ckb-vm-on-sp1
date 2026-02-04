@@ -11,7 +11,8 @@
 //! ```
 
 use clap::Parser;
-use sp1_core_executor::{MinimalExecutor, Program};
+use sp1_core_executor::{GasEstimatingVM, MinimalExecutor, Program, SP1CoreOpts};
+use sp1_hypercube::air::PROOF_NONCE_NUM_WORDS;
 use sp1_sdk::{include_elf, Elf, ProveRequest, Prover, ProverClient, ProvingKey, SP1Stdin};
 use std::sync::Arc;
 
@@ -39,25 +40,41 @@ async fn main() {
 
     let args = Args::parse();
 
-    let options_count =
-        args.execute as u8 + args.prove as u8 + args.minimal_execute as u8;
+    let options_count = args.execute as u8 + args.prove as u8 + args.minimal_execute as u8;
     if options_count != 1 {
-        eprintln!("Error: You must specify exactly one of --execute, --prove, or --minimal-execute");
+        eprintln!(
+            "Error: You must specify exactly one of --execute, --prove, or --minimal-execute"
+        );
         std::process::exit(1);
     }
 
     if args.minimal_execute {
         let elf_bytes: &[u8] = &CKB_VM_INTERPRETER_ELF;
         let program = Arc::new(Program::from(elf_bytes).unwrap());
-        let mut executor = MinimalExecutor::simple(program);
+        let mut executor = MinimalExecutor::new(program.clone(), false, Some(1000));
 
         executor.with_input(&[]);
 
+        let proof_nonce: [u32; PROOF_NONCE_NUM_WORDS] = [0; PROOF_NONCE_NUM_WORDS];
+        let opts = SP1CoreOpts::default();
+
+        let mut total_gas: u64 = 0;
+
         while !executor.is_done() {
-            executor.execute_chunk();
+            let trace_chunk = executor.execute_chunk().unwrap();
+            let mut gas_vm =
+                GasEstimatingVM::new(&trace_chunk, program.clone(), proof_nonce, opts.clone());
+            let report = gas_vm.execute().unwrap();
+            if let Some(gas) = report.gas() {
+                total_gas += gas;
+            }
         }
 
-        println!("Cycles executed: {}", executor.global_clk());
+        println!(
+            "Cycles executed: {:.1}M",
+            executor.global_clk() as f64 / 1_000_000.0
+        );
+        println!("Total gas cost: {:.1}M", total_gas as f64 / 1_000_000.0);
         println!("Exit code: {}", executor.exit_code());
         return;
     }

@@ -903,6 +903,7 @@ dependencies = [
  "serde_json",
  "sp1-build",
  "sp1-core-executor",
+ "sp1-hypercube",
  "sp1-sdk",
  "tokio",
  "tracing",
