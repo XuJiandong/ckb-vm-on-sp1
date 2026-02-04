@@ -9,4 +9,4 @@ asm = ["ckb-vm/asm"]
 
 [dependencies]
 sp1-zkvm = { git = "https://github.com/succinctlabs/sp1", tag = "v6.0.0-beta.1" }
-ckb-vm = { git = "https://github.com/mohanson-fork/ckb-vm.git", branch = "asm_rv64im_label" }
+ckb-vm = { git = "https://github.com/mohanson-fork/ckb-vm.git", branch = "asm_rv64im" }

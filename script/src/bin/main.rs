@@ -1,12 +1,14 @@
-//! An end-to-end example of using the SP1 SDK to generate a proof of a program that can be executed
-//! or have a core proof generated.
+//! SP1 script for executing and proving the CKB-VM interpreter program.
 //!
-//! You can run this script using the following command:
+//! Usage:
 //! ```shell
+//! # Fast execution with gas estimation (recommended for development)
+//! cargo run --release -- --minimal-execute
+//!
+//! # Full execution via ProverClient
 //! RUST_LOG=info cargo run --release -- --execute
-//! ```
-//! or
-//! ```shell
+//!
+//! # Generate proof (requires significant resources)
 //! RUST_LOG=info cargo run --release -- --prove
 //! ```
 
@@ -75,7 +77,11 @@ async fn main() {
             executor.global_clk() as f64 / 1_000_000.0
         );
         println!("Total gas cost: {:.1}M", total_gas as f64 / 1_000_000.0);
-        println!("Exit code: {}", executor.exit_code());
+
+        let exit_code = executor.exit_code();
+        if exit_code != 0 {
+            panic!("Execution failed with exit code: {}", exit_code);
+        }
         return;
     }
 
