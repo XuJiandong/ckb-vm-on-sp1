@@ -13,6 +13,7 @@
 //! ```
 
 use clap::Parser;
+use sha2::Digest;
 use sp1_core_executor::{GasEstimatingVM, MinimalExecutor, Program, SP1CoreOpts};
 use sp1_hypercube::air::PROOF_NONCE_NUM_WORDS;
 use sp1_sdk::{include_elf, Elf, ProveRequest, Prover, ProverClient, ProvingKey, SP1Stdin};
@@ -73,10 +74,12 @@ async fn main() {
         }
 
         println!(
-            "Cycles executed: {:.1}M",
+            "Cycles executed: {:.4}M",
             executor.global_clk() as f64 / 1_000_000.0
         );
-        println!("Total gas cost: {:.1}M", total_gas as f64 / 1_000_000.0);
+        println!("Total gas cost: {:.4}M", total_gas as f64 / 1_000_000.0);
+        let hash = sha2::Sha256::digest(elf_bytes);
+        println!("ELF SHA256: {}", hex::encode(hash));
 
         let exit_code = executor.exit_code();
         if exit_code != 0 {
