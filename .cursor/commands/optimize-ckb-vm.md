@@ -21,12 +21,12 @@ Current output:
 Running `target/release/ckb-vm-interpreter --minimal-execute`
 Exit code: 0
 CKB-VM cycles: 994360
-SP1 cycles executed: 27.0542M
-Total gas cost: 49.3115M
+SP1 instruction executed: 27.05M
+SP1 cycles: 216.43M
 ELF SHA256: ff7758c06f581907c046963792c4be3494fbe260e5fadc40cbb89033a35c5f46
 ```
 
-Our target is to reduce total gas cost or SP1 cycles executed(ignore CKB-VM cycles). You can try different strategies. Only keep results with more than 2% improvement. Before updating code, record old gas cost(and cycles executed) for further comparison.
+Our target is to reduce total SP1 cycles (ignore CKB-VM cycles). You can try different strategies. Only keep results with more than 2% improvement. Before updating code, record old SP1 cycles for further comparison.
 
 If any performance improvement is found, commit it to git immediately (at new branch name: `opt` in ckb-vm). Don't mix multiple enhancements in one commit.
 
