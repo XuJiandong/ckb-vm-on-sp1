@@ -13,9 +13,12 @@
 //! ```
 
 use clap::Parser;
+use sha2::Digest;
 use sp1_core_executor::{GasEstimatingVM, MinimalExecutor, Program, SP1CoreOpts};
 use sp1_hypercube::air::PROOF_NONCE_NUM_WORDS;
-use sp1_sdk::{include_elf, Elf, ProveRequest, Prover, ProverClient, ProvingKey, SP1Stdin};
+use sp1_sdk::{
+    include_elf, Elf, ProveRequest, Prover, ProverClient, ProvingKey, SP1PublicValues, SP1Stdin,
+};
 use std::sync::Arc;
 
 /// The ELF (executable and linkable format) file for the Succinct RISC-V zkVM.
@@ -60,28 +63,41 @@ async fn main() {
         let proof_nonce: [u32; PROOF_NONCE_NUM_WORDS] = [0; PROOF_NONCE_NUM_WORDS];
         let opts = SP1CoreOpts::default();
 
-        let mut total_gas: u64 = 0;
-
         while !executor.is_done() {
             let trace_chunk = executor.execute_chunk().unwrap();
             let mut gas_vm =
                 GasEstimatingVM::new(&trace_chunk, program.clone(), proof_nonce, opts.clone());
-            let report = gas_vm.execute().unwrap();
-            if let Some(gas) = report.gas() {
-                total_gas += gas;
-            }
+            let _ = gas_vm.execute().unwrap();
         }
 
+        let mut public_values = SP1PublicValues::from(executor.public_values_stream().as_slice());
+        let exit_code = public_values.read::<i8>();
+        let ckb_vm_cycles = public_values.read::<u64>();
+
+        println!("Exit code: {}", exit_code);
+        println!("CKB-VM cycles: {}", ckb_vm_cycles);
         println!(
-            "Cycles executed: {:.1}M",
+            "SP1 instruction executed: {:.2}M",
             executor.global_clk() as f64 / 1_000_000.0
         );
-        println!("Total gas cost: {:.1}M", total_gas as f64 / 1_000_000.0);
+        // since there is no syscall used, we use very simple calculation.
+        println!(
+            "SP1 cycles: {:.2}M",
+            (executor.global_clk() * 8) as f64 / 1_000_000.0
+        );
+        let hash = sha2::Sha256::digest(elf_bytes);
+        println!("ELF SHA256: {}", hex::encode(hash));
 
-        let exit_code = executor.exit_code();
         if exit_code != 0 {
-            panic!("Execution failed with exit code: {}", exit_code);
+            panic!("ckb-vm exit code is not 0");
         }
+        if executor.exit_code() != 0 {
+            panic!("sp1 exit code is not 0");
+        }
+        if ckb_vm_cycles != 994360 {
+            panic!("ckb-vm cycles not matched");
+        }
+
         return;
     }
 
@@ -92,8 +108,26 @@ async fn main() {
         let (mut public_values, report) =
             client.execute(CKB_VM_INTERPRETER_ELF, stdin).await.unwrap();
         let exit_code = public_values.read::<i8>();
-        println!("Program executed successfully. Exit code = {}", exit_code);
-        println!("Number of cycles: {}", report.total_instruction_count());
+        let ckb_vm_cycles = public_values.read::<u64>();
+        println!("Exit code: {}", exit_code);
+        println!("CKB-VM cycles: {}", ckb_vm_cycles);
+        println!(
+            "SP1 instruction executed: {:.2}M",
+            report.total_instruction_count() as f64 / 1_000_000.0
+        );
+        println!(
+            "SP1 cycles: {:.2}M",
+            (report.total_instruction_count() * 8) as f64 / 1_000_000.0
+        );
+        let elf_bytes: &[u8] = &CKB_VM_INTERPRETER_ELF;
+        let hash = sha2::Sha256::digest(elf_bytes);
+        println!("ELF SHA256: {}", hex::encode(hash));
+        if exit_code != 0 {
+            panic!("ckb-vm exit code is not 0");
+        }
+        if ckb_vm_cycles != 994360 {
+            panic!("ckb-vm cycles not matched");
+        }
     } else {
         let pk = client
             .setup(CKB_VM_INTERPRETER_ELF)

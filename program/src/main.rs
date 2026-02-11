@@ -39,7 +39,9 @@ fn main_interpreter64(code: Bytes, args: Vec<Bytes>) {
         .load_program(&code, args.into_iter().map(Ok))
         .expect("load program");
     let exit_code = machine.run().expect("run program");
+    let cycles = machine.cycles();
     sp1_zkvm::io::commit(&exit_code);
+    sp1_zkvm::io::commit(&cycles);
 }
 
 #[cfg(feature = "asm")]
@@ -58,7 +60,9 @@ fn main_asm64(code: Bytes, args: Vec<Bytes>) {
         .load_program(&code, args.into_iter().map(Ok))
         .expect("load program");
     let exit_code = machine.run().expect("run program");
+    let cycles = machine.machine.cycles();
     sp1_zkvm::io::commit(&exit_code);
+    sp1_zkvm::io::commit(&cycles);
 }
 
 fn main() {

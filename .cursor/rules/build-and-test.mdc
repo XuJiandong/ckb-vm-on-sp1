@@ -1,0 +1,11 @@
+---
+description: Build and test commands to verify changes in this SP1 project
+alwaysApply: true
+---
+
+After changes, use following to verify and test:
+
+```
+cd program && cargo prove build
+cd .. && cargo run --release -- --minimal-execute
+```

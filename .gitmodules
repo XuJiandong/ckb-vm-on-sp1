@@ -1,0 +1,4 @@
+[submodule "deps/ckb-vm"]
+	path = deps/ckb-vm
+	url = https://github.com/mohanson-fork/ckb-vm.git
+	branch = asm_rv64im
