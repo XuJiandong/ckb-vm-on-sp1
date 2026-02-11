@@ -4,7 +4,7 @@ name = "ckb-vm-interpreter-program"
 edition = "2021"
 
 [features]
-default = ["asm", "use-k256"]
+default = ["asm"]
 asm = ["ckb-vm/asm"]
 use-k256 = []
 

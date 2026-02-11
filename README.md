@@ -29,13 +29,13 @@ cd program
 
 Or it will be automatically built through `script/build.rs` when the script is built.
 
-Features (both enabled by default):
-- `asm`: Enables CKB-VM's optimized assembly interpreter
-- `use-k256`: Uses the Rust k256 library for ECDSA verification. Disable this to use the C secp256k1 library for better performance.
+Features:
+- `asm` (default): Enables CKB-VM's optimized assembly interpreter
+- `use-k256`: Uses the Rust k256 library for ECDSA verification instead of the C secp256k1 library
 
-To build without a specific feature:
+To build with a specific feature:
 ```sh
-~/.sp1/bin/cargo-prove prove build --no-default-features --features asm
+~/.sp1/bin/cargo-prove prove build --features use-k256
 ``` 
 
 
@@ -43,31 +43,36 @@ To build without a specific feature:
 
 For faster development iteration, use `--minimal-execute` which only outputs cycle count and gas cost:
 ```sh
-cargo run --release -- --minimal-execute --mode vm
-cargo run --release -- --minimal-execute --mode native
+cargo run --release -- --minimal-execute
 ```
 
 To run the program without generating a proof (slower than above):
 
 ```sh
-cargo run --release -- --execute --mode vm
-cargo run --release -- --execute --mode native
+cargo run --release -- --execute
 ```
 
 ### Benchmark
 
-The `--mode` flag accepts `vm` or `native`:
+To compare performance, use the `--mode` flag:
 - `vm` (default): Runs k256_ecdsa inside CKB-VM interpreter on SP1
 - `native`: Runs k256_ecdsa directly on SP1
 
-| Mode   | SP1 Instructions | SP1 Cycles | CKB-VM Cycles |
-|--------|------------------|------------|---------------|
-| vm     | 135.07M          | 1080.52M   | 7,770,651     |
-| native | 2.62M            | 20.99M     | N/A           |
+```sh
+cargo run --release -- --minimal-execute --mode vm
+cargo run --release -- --minimal-execute --mode native
+```
+
+Results with `use-k256` feature enabled:
+
+| Mode   | SP1 Instructions | SP1 Cycles | 
+|--------|------------------|------------|
+| vm     | 135.07M          | 1080.52M   | 
+| native | 2.62M            | 20.99M     | 
 
 The VM mode is about 51x slower than native mode.
 
-The benchmarks above use the CKB-VM RV64IM implementation with the Rust k256 library, which is not the optimal approach for ECDSA (secp256k1) signature verification. For better performance, use the C version of secp256k1 by disabling the `use-k256` feature in the program. The results are as follows:
+The benchmarks above use the Rust [k256](https://crates.io/crates/k256) library, which is not the optimal approach for ECDSA (secp256k1) signature verification. By default, the program uses the C version of [secp256k1](https://github.com/bitcoin-core/secp256k1) for better performance:
 
 ```
 SP1 instruction executed: 27.05M
@@ -80,8 +85,7 @@ SP1 instruction executed: 27.05M
 To generate an SP1 [core proof](https://docs.succinct.xyz/docs/sp1/generating-proofs/proof-types#core-default):
 
 ```sh
-cargo run --release -- --prove --mode vm
-cargo run --release -- --prove --mode native
+cargo run --release -- --prove
 ```
 
 > **Note:** Proof generation is resource-intensive and may take significant time and memory.
