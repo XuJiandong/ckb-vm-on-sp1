@@ -4,8 +4,9 @@ name = "ckb-vm-interpreter-program"
 edition = "2021"
 
 [features]
-default = ["asm"]
+default = ["asm", "use-k256"]
 asm = ["ckb-vm/asm"]
+use-k256 = []
 
 [dependencies]
 sp1-zkvm = { git = "https://github.com/succinctlabs/sp1", tag = "v6.0.0-beta.1" }

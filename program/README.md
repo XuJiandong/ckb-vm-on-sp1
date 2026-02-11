@@ -9,7 +9,12 @@ This is an SP1 zkVM program that runs a CKB-VM interpreter to execute a secp256k
 
 ## Description
 
-The program `src/secp256k1_ecdsa_ckbvm` is a compiled RISC-V binary from the [CKB-VM test suite](https://github.com/nervosnetwork/ckb-vm-contrib/tree/main/ckb-vm-test-suite/programs/contracts/secp256k1_ecdsa). It performs a single secp256k1 ECDSA signature verification inside the CKB-VM, which itself runs within the SP1 zkVM.
+The program `src/secp256k1_ecdsa_ckbvm` is a compiled RISC-V binary from the [CKB-VM test suite](https://github.com/nervosnetwork/ckb-vm-contrib/tree/main/ckb-vm-test-suite/programs/contracts/secp256k1_ecdsa). It performs a single secp256k1 ECDSA signature verification inside the CKB-VM, which itself runs within the SP1 zkVM. Uses the C version of secp256k1.
+
+The program `src/k256_ecdsa_ckbvm` is a compiled RISC-V binary from the [CKB-VM test suite](https://github.com/nervosnetwork/ckb-vm-contrib/tree/main/ckb-vm-test-suite/programs/contracts/secp256k1_ecdsa). It performs a single secp256k1 ECDSA signature verification inside the CKB-VM, which itself runs within the SP1 zkVM. Uses the Rust k256 crate.
+
+The program `script/binaries/k256_ecdsa_sp1` is a compiled RISC-V binary from the [CKB-VM test suite](https://github.com/nervosnetwork/ckb-vm-contrib/tree/main/ckb-vm-test-suite/programs/contracts/secp256k1_ecdsa_sp1). It performs a single secp256k1 ECDSA signature verification within the SP1 zkVM. Uses the Rust k256 crate.
+
 
 ## Build
 
