@@ -11,7 +11,10 @@ sp1_zkvm::entrypoint!(main);
 use ckb_vm::cost_model::estimate_cycles;
 use ckb_vm::{Bytes, DefaultMachineRunner, SupportMachine, Syscalls};
 
+#[cfg(not(feature = "use-k256"))]
 const CODE: &[u8] = include_bytes!("secp256k1_ecdsa_ckbvm");
+#[cfg(feature = "use-k256")]
+const CODE: &[u8] = include_bytes!("k256_ecdsa_ckbvm");
 
 pub struct DebugSyscall {}
 
