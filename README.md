@@ -41,7 +41,7 @@ To build with a specific feature:
 
 ### Execute the Program
 
-For faster development iteration, use `--minimal-execute` which only outputs cycle count and gas cost:
+For faster development iteration, use `--minimal-execute`:
 ```sh
 cargo run --release -- --minimal-execute
 ```
@@ -65,10 +65,10 @@ cargo run --release -- --minimal-execute --mode native
 
 Results with `use-k256` feature enabled:
 
-| Mode   | SP1 Instructions | SP1 Cycles | 
-|--------|------------------|------------|
-| vm     | 135.07M          | 1080.52M   | 
-| native | 2.62M            | 20.99M     | 
+| Mode   | SP1 Instructions |
+|--------|------------------|
+| vm     | 135.07M          |
+| native | 2.62M            |
 
 The VM mode is about 51x slower than native mode.
 
@@ -77,7 +77,6 @@ The benchmarks above use the Rust [k256](https://crates.io/crates/k256) library,
 ```
 SP1 instruction executed: 27.05M
 ```
-
 
 
 ### Generate an SP1 Core Proof
